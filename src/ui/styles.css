@@ -349,6 +349,123 @@ body {
   }
 }
 
+/* ---------- Landing overlay (imprint wordmark + iOS glass button) ---------- */
+
+.landing {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  pointer-events: none; /* taps outside the button reach the world */
+  background: rgba(10, 14, 20, 0.28);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+}
+
+.landing__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 26px;
+}
+
+.landing__brand {
+  margin: 0;
+  font-size: clamp(2.4rem, 11vw, 3.6rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* iPhone-style frosted "liquid glass" button. */
+.glass-btn {
+  position: relative;
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #fff;
+  cursor: pointer;
+  isolation: isolate;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.28),
+    rgba(255, 255, 255, 0.1)
+  );
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  backdrop-filter: blur(18px) saturate(180%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.55) inset,
+    0 -1px 0 rgba(255, 255, 255, 0.12) inset,
+    0 10px 34px rgba(0, 0, 0, 0.38);
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Bright specular sheen along the top edge. */
+.glass-btn::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.4),
+    rgba(255, 255, 255, 0) 48%
+  );
+  pointer-events: none;
+}
+
+/* 1px edge light that reads as a glass rim. */
+.glass-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+}
+
+.glass-btn__chevron {
+  font-size: 1.1rem;
+  opacity: 0.85;
+  transition: transform 0.16s ease;
+}
+
+.glass-btn:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.34),
+    rgba(255, 255, 255, 0.14)
+  );
+}
+
+.glass-btn:hover .glass-btn__chevron {
+  transform: translateX(3px);
+}
+
+.glass-btn:active {
+  transform: scale(0.97);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.45) inset,
+    0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
 /* ---------- World map overlay (pan/zoom explorer) ---------- */
 
 .world-map-open {

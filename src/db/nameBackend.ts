@@ -1,8 +1,10 @@
 /**
  * Storage backends for carved names.
  *
- * A place can hold many names, so the store is append-only: every name written
- * becomes its own row and nothing is ever overwritten.
+ * A place can hold many names. Supabase keeps one row per place (`place_id` is
+ * the primary key) and stores every name in the `name` column, separated by a
+ * newline. Writing reads the row, appends the new name and upserts, so nothing is
+ * ever overwritten and everyone shares the same list.
  *
  * Two implementations behind one interface:
  *   - Supabase — a shared remote database, used when `VITE_SUPABASE_URL` and
@@ -12,7 +14,7 @@
  *   - IndexedDB — a local browser database, used otherwise.
  *
  * Expected Supabase table (see README for the SQL):
- *   carvings(id bigint identity pk, place_id text, name text, created_at timestamptz)
+ *   carvings(place_id text primary key, name text not null, updated_at timestamptz)
  */
 export interface NameRecord {
   placeId: string;
@@ -27,6 +29,9 @@ export interface NameBackend {
 }
 
 const SUPABASE_TABLE = 'carvings';
+
+/** Separator used to store multiple names inside one row's `name` column. */
+const NAME_SEPARATOR = '\n';
 
 /** Shared remote store via Supabase's REST API (no SDK dependency). */
 class SupabaseBackend implements NameBackend {
@@ -43,10 +48,9 @@ class SupabaseBackend implements NameBackend {
   }
 
   async loadAll(): Promise<NameRecord[]> {
-    const response = await fetch(
-      `${this.endpoint}?select=place_id,name&order=created_at.asc`,
-      { headers: this.headers },
-    );
+    const response = await fetch(`${this.endpoint}?select=place_id,name`, {
+      headers: this.headers,
+    });
     if (!response.ok) {
       throw new Error(`Supabase load failed: ${response.status}`);
     }
@@ -54,14 +58,39 @@ class SupabaseBackend implements NameBackend {
       place_id: string;
       name: string;
     }>;
-    return rows.map((row) => ({ placeId: row.place_id, name: row.name }));
+
+    const records: NameRecord[] = [];
+    for (const row of rows) {
+      if (!row.name) continue;
+      for (const part of row.name.split(NAME_SEPARATOR)) {
+        const trimmed = part.trim();
+        if (trimmed) records.push({ placeId: row.place_id, name: trimmed });
+      }
+    }
+    return records;
   }
 
   async add(placeId: string, name: string): Promise<void> {
+    // Read the existing names for this place, then upsert the combined list.
+    const read = await fetch(
+      `${this.endpoint}?place_id=eq.${encodeURIComponent(placeId)}&select=name`,
+      { headers: this.headers },
+    );
+    if (!read.ok) {
+      throw new Error(`Supabase read failed: ${read.status}`);
+    }
+    const rows = (await read.json()) as Array<{ name: string }>;
+    const existing = rows[0]?.name ?? '';
+    const merged = existing ? `${existing}${NAME_SEPARATOR}${name}` : name;
+
     const response = await fetch(this.endpoint, {
       method: 'POST',
-      headers: { ...this.headers, Prefer: 'return=minimal' },
-      body: JSON.stringify([{ place_id: placeId, name }]),
+      headers: {
+        ...this.headers,
+        // Existing row for this place_id is updated in place.
+        Prefer: 'resolution=merge-duplicates,return=minimal',
+      },
+      body: JSON.stringify([{ place_id: placeId, name: merged }]),
     });
     if (!response.ok) {
       throw new Error(`Supabase save failed: ${response.status}`);

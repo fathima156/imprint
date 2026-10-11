@@ -126,8 +126,46 @@ function carveAccess(place: Place): CarveAccess {
   };
 }
 
+/**
+ * The landing overlay: a minimal intro shown transparently over the live world.
+ * Just the wordmark and an iOS-style frosted "glass" button that dismisses it.
+ * Returns the overlay element.
+ */
+function createLandingOverlay(): HTMLElement {
+  const screen = document.createElement('div');
+  screen.className = 'landing';
+
+  const inner = document.createElement('div');
+  inner.className = 'landing__inner';
+
+  const brand = document.createElement('h1');
+  brand.className = 'landing__brand';
+  brand.textContent = 'imprint';
+
+  const enter = document.createElement('button');
+  enter.type = 'button';
+  enter.className = 'glass-btn';
+  enter.setAttribute('aria-label', 'Enter the world');
+
+  const label = document.createElement('span');
+  label.className = 'glass-btn__label';
+  label.textContent = 'Enter the world';
+
+  const chevron = document.createElement('span');
+  chevron.className = 'glass-btn__chevron';
+  chevron.setAttribute('aria-hidden', 'true');
+  chevron.textContent = '→';
+
+  enter.append(label, chevron);
+  enter.addEventListener('click', () => screen.remove());
+
+  inner.append(brand, enter);
+  screen.append(inner);
+  return screen;
+}
+
 /** Show the endless world with all places. */
-function showWorld(): void {
+function showWorld(options?: { showLanding?: boolean }): void {
   clearApp();
 
   const screen = document.createElement('div');
@@ -182,6 +220,11 @@ function showWorld(): void {
   mapButton.addEventListener('click', () => map.show());
   activeUnsubscribers.push(() => map.dispose());
   screen.append(map.element);
+
+  // Intro overlay, transparent over the live world (dismissed by its button).
+  if (options?.showLanding) {
+    screen.append(createLandingOverlay());
+  }
 }
 
 /** A dropdown listing every place, used to fast-travel across the world. */
@@ -239,7 +282,7 @@ function createDetailToolbar(place: Place): HTMLElement {
   back.type = 'button';
   back.className = 'btn btn-back';
   back.textContent = '‹ World';
-  back.addEventListener('click', showWorld);
+  back.addEventListener('click', () => showWorld());
 
   const title = document.createElement('span');
   title.className = 'viewer-title';
@@ -367,13 +410,13 @@ function createSimulateToggle(): HTMLElement {
   return wrap;
 }
 
-// Load saved names from the database, then boot into the world so they appear
-// on the monuments immediately. Location watching starts now so a fix is ready
-// by the time the visitor opens a place.
+// Load saved names from the database, then open the world with the intro
+// overlay over it. Location watching starts now so a fix is ready by the time a
+// place is opened.
 async function boot(): Promise<void> {
   location.start();
   await loadNames();
-  showWorld();
+  showWorld({ showLanding: true });
 }
 
 void boot();
