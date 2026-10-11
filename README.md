@@ -7,7 +7,7 @@ Layover Marks is a browsable 3D world of famous Indian places: the Taj Mahal, Qu
 Built for a hackathon. Runs in the browser, nothing to install.
 
 > 📦 **Code:** [github.com/fathima156/imprint](https://github.com/fathima156/imprint)
-> 🔗 **Live demo:** (https://imprint-nmm4.onrender.com/)
+> 🔗 **Live demo:** https://imprint-nmm4.onrender.com/
 
 - 📱 **Made for phones.** Touch joystick, pinch to zoom, no accounts needed to start.
 - 📏 **Real scale.** 1 unit = 1 metre. Monuments are built at roughly their true size, and every place sits at its true latitude/longitude, so the distances between places are the real ones.
@@ -20,9 +20,9 @@ Built for a hackathon. Runs in the browser, nothing to install.
 
 ### 🎬 Demo
 <!-- Paste a YouTube / Drive link, or drop a GIF into docs/demo/ and use ![Demo](docs/demo/demo.gif) -->
-- **Demo video:** _link coming soon_
-- **Demo GIF:** _coming soon_
-- **Presentation / slides:** _link coming soon_
+- **Demo video:** https://drive.google.com/file/d/1dPfHhLohbpJGXaYhpFf3PAjcz1CJf4eP/view?usp=sharing
+
+
 
 ### 🖼️ Project photos
 <!--
