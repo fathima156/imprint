@@ -165,7 +165,9 @@ function createLandingOverlay(): HTMLElement {
 }
 
 /** Show the endless world with all places. */
-function showWorld(options?: { showLanding?: boolean }): void {
+async function showWorld(options?: { showLanding?: boolean }): Promise<void> {
+  // Pull the latest shared names so marks other people added show up too.
+  await loadNames();
   clearApp();
 
   const screen = document.createElement('div');
@@ -253,7 +255,9 @@ function createTravelMenu(onPick: (placeId: string) => void): HTMLElement {
 }
 
 /** Open a single place (tap handler for the world). */
-function openPlace(place: Place): void {
+async function openPlace(place: Place): Promise<void> {
+  // Refresh first so any names others carved appear when you open the place.
+  await loadNames();
   clearApp();
 
   const screen = document.createElement('div');
@@ -282,7 +286,7 @@ function createDetailToolbar(place: Place): HTMLElement {
   back.type = 'button';
   back.className = 'btn btn-back';
   back.textContent = '‹ World';
-  back.addEventListener('click', () => showWorld());
+  back.addEventListener('click', () => void showWorld());
 
   const title = document.createElement('span');
   title.className = 'viewer-title';
@@ -415,8 +419,7 @@ function createSimulateToggle(): HTMLElement {
 // place is opened.
 async function boot(): Promise<void> {
   location.start();
-  await loadNames();
-  showWorld({ showLanding: true });
+  await showWorld({ showLanding: true });
 }
 
 void boot();

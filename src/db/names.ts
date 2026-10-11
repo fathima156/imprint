@@ -19,10 +19,11 @@ function getBackend(): NameBackend {
   return backend;
 }
 
-/** Load every stored name into `signedNames`. Safe to call once at startup. */
+/** Load every stored name into `signedNames`, replacing what was there. */
 export async function loadNames(): Promise<void> {
   try {
     const rows = await getBackend().loadAll();
+    signedNames.clear();
     for (const row of rows) {
       if (!row.name) continue;
       const list = signedNames.get(row.placeId);
