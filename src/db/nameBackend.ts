@@ -214,7 +214,11 @@ export function createNameBackend(): NameBackend {
       : new MemoryBackend();
 
   if (url && key) {
+    console.info(`Names: using shared Supabase store (${url}).`);
     return new FallbackBackend(new SupabaseBackend(url, key), local);
   }
+  console.info(
+    'Names: Supabase not configured, using this device only (local storage).',
+  );
   return local;
 }
